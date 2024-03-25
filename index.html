@@ -11,47 +11,148 @@
         <form name="calculator" action="">
             <input type="textfield" name="ans" value="" autocomplete="off" readonly>
             
-            <input type="reset" value="C" class="clearall">
+            <input type="button" value="C" onclick="clearAll()" class="clearall">
             <input type="button" value="÷" onclick="document.calculator.ans.value+='÷'" class="operator">
             <input type="button" value="*" onclick="document.calculator.ans.value+='*'" class="operator">
-            <input type="button" value="x" class="clear" onclick="delLastDigit()">
+            <input type="button" value="x" class="clear" onclick="clearDigits()">
             
-            <input type="button" value="7" onclick="document.calculator.ans.value+='7'" class="gray">
-            <input type="button" value="8" onclick="document.calculator.ans.value+='8'" class="gray">
-            <input type="button" value="9" onclick="document.calculator.ans.value+='9'" class="gray">
+            <input type="button" value="7" onclick="addNumber('7')" class="gray">
+            <input type="button" value="8" onclick="addNumber('8')" class="gray">
+            <input type="button" value="9" onclick="addNumber('9')" class="gray">
             <input type="button" value="-" onclick="document.calculator.ans.value+='-'" class="operator">
 
-            <input type="button" value="4" onclick="document.calculator.ans.value+='4'" class="gray">
-            <input type="button" value="5" onclick="document.calculator.ans.value+='5'" class="gray">
-            <input type="button" value="6" onclick="document.calculator.ans.value+='6'" class="gray">
+            <input type="button" value="4" onclick="addNumber('4')" class="gray">
+            <input type="button" value="5" onclick="addNumber('5')" class="gray">
+            <input type="button" value="6" onclick="addNumber('6')" class="gray">
             <input type="button" value="+" onclick="document.calculator.ans.value+='+'" class="operator">
             
-            <input type="button" value="1" onclick="document.calculator.ans.value+='1'" class="gray">
-            <input type="button" value="2" onclick="document.calculator.ans.value+='2'" class="gray">
-            <input type="button" value="3" onclick="document.calculator.ans.value+='3'" class="gray">
+            <input type="button" value="1" onclick="addNumber('1')" class="gray">
+            <input type="button" value="2" onclick="addNumber('2')" class="gray">
+            <input type="button" value="3" onclick="addNumber('3')" class="gray">
             
-            <input type="button" value="=" onclick="calDivision()" class="igual" >
-            <input type="button" value="%" onclick="calPercentage()" class="gray">
-            <input type="button" value="0" onclick="document.calculator.ans.value+='0'" class="gray">
-            <input type="button" value="." onclick="document.calculator.ans.value+='.'" class="gray">            
+            <input type="button" value="=" onclick="calOperation()" class="igual" >
+            <input type="button" value="%" onclick="document.calculator.ans.value+='%'" class="gray">
+            <input type="button" value="0" onclick="addNumber('0')" class="gray">
+            <input type="button" value="." onclick="document.calculator.ans.value+='.'" class="gray">         
             
         </form>
     </div>
 </body>
 
 <script>
-    function delLastDigit() {
-        var textField = document.calculator.ans;
-        textField.value = textField.value.slice(0, -1);
+
+document.addEventListener('keydown', function(event) {
+    var key = event.key;
+    var textField = document.calculator.ans;
+
+    switch (key) {
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
+            addNumber(key);
+            break;
+        case '+': case '-': case '*': case '/':
+            textField.value += key;
+            break;
+        case 'Enter': // Para el botón igual
+            event.preventDefault();
+            calOperation();
+            break;
+        case 'Escape': // Para el botón Clear
+            clearAll();
+            break;
+        case 'Backspace': // Para el botón x
+            clearDigits();
+            break;
+        case '.': // Para el botón Punto .
+            var textField = document.calculator.ans;
+            // Verificar si el punto ya está presente en el campo
+            if (textField.value.indexOf('.') === -1) {
+                textField.value += '.';
+            }
+            break;
+        default:
+            // Ignorar cualquier otra tecla
+            break;
     }
-    function calPercentage() {
-        var textField = document.calculator.ans;
-        textField.value = textField.value / 100;
+});
+
+function addNumber(num) {
+    var textField = document.calculator.ans;
+    if (textField.value === '0') {
+        textField.value = num;
+    } else {
+        textField.value += num;
     }
-    function calDivision() {
-        var textField = document.calculator.ans;
-        var calculation = textField.value.replace('÷', '/');
-        textField.value = eval(calculation);
+}
+
+function clearAll() {
+    document.calculator.ans.value = '0';
+}
+function clearDigits() {
+    var textField = document.calculator.ans;
+    textField.value = textField.value.slice(0, -1);
+}
+function calOperation() {
+    var result;
+    var ans = document.calculator.ans.value;
+
+    if (ans.includes('+')) {
+        var numbers = ans.split('+');
+        if (numbers.length === 2) {
+            var num1 = Number(numbers[0]);
+            var num2 = numbers[1].includes('%') ? Number(numbers[1].slice(0, -1)) / 100 * num1 : Number(numbers[1]);
+            if (!isNaN(num1) && !isNaN(num2)) {
+                result = num1 + num2;
+            } else {
+                console.log('Error en la suma');
+            }
+        }
+    } else if (ans.includes('-')) {
+        var numbers = ans.split('-');
+        if (numbers.length === 2) {
+            var num1 = Number(numbers[0]);
+            var num2 = Number(numbers[1]);
+            if (!isNaN(num1) && !isNaN(num2)) {
+                result = num1 - num2;
+            } else {
+                console.log('Error en la resta');
+            }
+        }
+    } else if (ans.includes('*')) {
+        var numbers = ans.split('*');
+        if (numbers.length === 2) {
+            var num1 = Number(numbers[0]);
+            var num2 = Number(numbers[1]);
+            if (!isNaN(num1) && !isNaN(num2)) {
+                result = num1 * num2;
+            } else {
+                console.log('Error en la multiplicación');
+            }
+        }
+    } else if (ans.includes('÷') || ans.includes('/')) {
+        var operator = ans.includes('÷') ? '÷' : '/';
+        var numbers = ans.split(operator);
+        if (numbers.length === 2) {
+            var num1 = Number(numbers[0]);
+            var num2 = Number(numbers[1]);
+            if (!isNaN(num1) && !isNaN(num2)) {
+                result = num1 / num2;
+            } else {
+                console.log('Error en la división');
+            }
+        }
+    } else if (ans.endsWith('%')) {
+        var num = Number(ans.slice(0, -1)) / 100;
+        if (!isNaN(num)) {
+            result = num;
+        } else {
+            console.log('Error en el porcentaje');
+        }
     }
+
+    document.calculator.ans.value = result !== undefined ? String(result) : ans;
+}
+
 </script>
+
 </html>
